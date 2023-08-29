@@ -5,6 +5,11 @@ type arrayEntry[T any] struct {
 	Index int
 	Value T
 }
+type arrayDuplicates struct {
+	Count int
+	HasDuplicates bool
+	Indexs []int
+}
 
 func newArrayInstance[T any]() arrayInstance[T] {
 	return arrayInstance[T]{}
@@ -35,8 +40,29 @@ func (a *arrayInstance[T]) First() arrayEntry[T] {
 	}
 }
 
-func (a *arrayInstance[T]) HasDuplicates(key T) {
+func (a *arrayInstance[T]) HasDuplicates(key T) arrayDuplicates {
+	var (
+		count int = 0
+		hasDups bool = false
+		indexs arrayInstance[int] = newArrayInstance[int]()
+	)
 
+	for ind, val := range *a {
+		if val == key {
+			indexs.Append(ind)
+			count = count + 1
+		}
+	}
+
+	if indexs.Length() < 1 {
+		hasDups = true
+	}
+
+	return arrayDuplicates{
+		Count: count,
+		HasDuplicates: hasDups,
+		Indexs: indexs.([]int),
+	}
 }
 
 // Retrieves the last item defined in the array.
@@ -55,4 +81,11 @@ func (a *arrayInstance[T]) Last() arrayEntry[T] {
 // Gets the length/size of the array.
 func (a *arrayInstance[T]) Length() int {
 	return len(*a)
+}
+
+// Pushes an item into the array, like append but then an alias.
+func (a *arrayInstance[T]) Push(entries ...T) arrayInstance {
+	for _, val := range entries {
+		a.Append(val)
+	}
 }
