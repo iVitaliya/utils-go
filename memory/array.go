@@ -43,7 +43,7 @@ func (a *arrayInstance[T]) HasDuplicates(key T) {
 func (a *arrayInstance[T]) Last() arrayEntry[T] {
 	var (
 		ind = len(*a) - 1
-		val = arr[ind]
+		val = (*a)[ind]
 	)
 
 	return arrayEntry[T]{
