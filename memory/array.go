@@ -16,11 +16,9 @@ func (a *arrayInstance[T]) At(index int) arrayEntry[T] {
 	} else if index > a.Length() {
 		return a.Last()
 	} else {
-		arr := *a
-
 		return arrayEntry[T]{
 			Index: index,
-			Value: arr[index],
+			Value: (*a)[index],
 		}
 	}
 }
@@ -31,14 +29,9 @@ func (a *arrayInstance[T]) Append(entry T) arrayInstance[T] {
 
 // Retrieves the First item defined in the array.
 func (a *arrayInstance[T]) First() arrayEntry[T] {
-	var (
-		arr = *a
-		val = arr[0]
-	)
-
 	return arrayEntry[T]{
 		Index: 0,
-		Value: val,
+		Value: (*a)[0],
 	}
 }
 
@@ -49,8 +42,7 @@ func (a *arrayInstance[T]) HasDuplicates(key T) {
 // Retrieves the last item defined in the array.
 func (a *arrayInstance[T]) Last() arrayEntry[T] {
 	var (
-		arr = *a
-		ind = len(arr) - 1
+		ind = len(*a) - 1
 		val = arr[ind]
 	)
 
