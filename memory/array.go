@@ -29,7 +29,9 @@ func (a *arrayInstance[T]) At(index int) arrayEntry[T] {
 }
 
 func (a *arrayInstance[T]) Append(entry T) arrayInstance[T] {
+	duplicates := a.HasDuplicates(entry)
 
+	
 }
 
 // Retrieves the First item defined in the array.
