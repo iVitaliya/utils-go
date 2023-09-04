@@ -1,17 +1,19 @@
 package memory
 
+import "fmt"
+
 type arrayInstance[T any] []T
 type arrayEntry[T any] struct {
 	Index int
 	Value T
 }
 type arrayDuplicates struct {
-	Count int
+	Count         int
 	HasDuplicates bool
-	Indexs []int
+	Indexs        []int
 }
 
-func newArrayInstance[T any]() arrayInstance[T] {
+func NewArray[T any]() arrayInstance[T] {
 	return arrayInstance[T]{}
 }
 
@@ -31,7 +33,7 @@ func (a *arrayInstance[T]) At(index int) arrayEntry[T] {
 func (a *arrayInstance[T]) Append(entry T) arrayInstance[T] {
 	duplicates := a.HasDuplicates(entry)
 
-	
+	duplicates.Indexs
 }
 
 // Retrieves the First item defined in the array.
@@ -44,13 +46,16 @@ func (a *arrayInstance[T]) First() arrayEntry[T] {
 
 func (a *arrayInstance[T]) HasDuplicates(key T) arrayDuplicates {
 	var (
-		count int = 0
-		hasDups bool = false
-		indexs arrayInstance[int] = newArrayInstance[int]()
+		key_str                    = fmt.Sprint(key)
+		count   int                = 0
+		hasDups bool               = false
+		indexs  arrayInstance[int] = NewArray[int]()
 	)
 
 	for ind, val := range *a {
-		if val == key {
+		val_str := fmt.Sprint(val)
+
+		if val_str == key_str {
 			indexs.Append(ind)
 			count = count + 1
 		}
@@ -61,9 +66,9 @@ func (a *arrayInstance[T]) HasDuplicates(key T) arrayDuplicates {
 	}
 
 	return arrayDuplicates{
-		Count: count,
+		Count:         count,
 		HasDuplicates: hasDups,
-		Indexs: indexs.([]int),
+		Indexs:        indexs.([]int),
 	}
 }
 
