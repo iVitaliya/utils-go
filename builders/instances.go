@@ -5,3 +5,6 @@ type builders struct{}
 func NewInstance() builders {
 	return builders{}
 }
+
+func test() {
+}
