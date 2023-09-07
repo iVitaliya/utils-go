@@ -39,6 +39,22 @@ func (mi *mapInstance[T]) At(index int) T {
 	return *new(T)
 }
 
+// Does the same as .DeleteAll() but then returns all the deleted key-value's.
+func (mi *mapInstance[T]) Clear() []*mapEntry[T] {
+	var arr []*mapEntry[T]
+
+	for key, val := range *mi {
+		arr = append(arr, &mapEntry[T]{
+			Key:   key,
+			Value: val.value,
+		})
+
+		delete(*mi, key)
+	}
+
+	return arr
+}
+
 // Deletes an item from the map and returns if it was successfully deleted or not.
 func (mi *mapInstance[T]) Delete(key string) bool {
 	if !mi.Has(key) {
@@ -47,6 +63,13 @@ func (mi *mapInstance[T]) Delete(key string) bool {
 
 	delete(*mi, key)
 	return true
+}
+
+// Deletes all items one-by-one from the map.
+func (mi *mapInstance[T]) DeleteAll() {
+	for key, _ := range *mi {
+		mi.Delete(key)
+	}
 }
 
 func (mi *mapInstance[T]) Every(predicate func(element T, iterator mapInstance[T]) bool) bool {
@@ -105,5 +128,4 @@ func (mi *mapInstance[T]) ToArray() arrayInstance[T] {
 		arr.Append(element)
 	})
 
-	
 }
