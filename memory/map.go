@@ -1,5 +1,11 @@
 package memory
 
+import (
+	log "github.com/iVitaliya/utils-go/logger"
+)
+
+var logger = log.NewLogger()
+
 type mapInstance[T any] map[string]struct {
 	value T
 	index int
@@ -52,6 +58,8 @@ func (mi *mapInstance[T]) Clear() []*mapEntry[T] {
 		delete(*mi, key)
 	}
 
+	logger.Warn("All the present keys located in the Map have been deleted by using the Clear() method")
+
 	return arr
 }
 
@@ -96,6 +104,17 @@ func (mi *mapInstance[T]) ForEach(predicate func(element T, iterator mapInstance
 	}
 }
 
+func (mi *mapInstance[T]) Get(key string) T {
+	for k, val := range *mi {
+		if k == key {
+			return val.value
+		}
+	}
+
+	logger.Error("Couldn't find the key \"" + key + "\" in the Map, are you sure you provided the right key and didn't make a typo?")
+	return *new(T)
+}
+
 func (mi *mapInstance[T]) Has(key string) bool {
 	for k, _ := range *mi {
 		if key == k {
@@ -128,4 +147,5 @@ func (mi *mapInstance[T]) ToArray() arrayInstance[T] {
 		arr.Append(element)
 	})
 
+	return arr
 }
