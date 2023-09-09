@@ -31,9 +31,7 @@ func (a *arrayInstance[T]) At(index int) arrayEntry[T] {
 }
 
 func (a *arrayInstance[T]) Append(entry T) arrayInstance[T] {
-	duplicates := a.HasDuplicates(entry)
-
-	duplicates.Indexs
+	a.removeDuplicates(entry)
 }
 
 // Retrieves the First item defined in the array.
@@ -44,7 +42,7 @@ func (a *arrayInstance[T]) First() arrayEntry[T] {
 	}
 }
 
-func (a *arrayInstance[T]) HasDuplicates(key T) arrayDuplicates {
+func (a *arrayInstance[T]) hasDuplicates(key T) arrayDuplicates {
 	var (
 		key_str                    = fmt.Sprint(key)
 		count   int                = 0
@@ -91,8 +89,20 @@ func (a *arrayInstance[T]) Length() int {
 }
 
 // Pushes an item into the array, like append but then an alias.
-func (a *arrayInstance[T]) Push(entries ...T) arrayInstance {
+func (a *arrayInstance[T]) Push(entries ...T) arrayInstance[T] {
 	for _, val := range entries {
 		a.Append(val)
+	}
+
+	return *a
+}
+
+func (a *arrayInstance[T]) removeDuplicates(key T) {
+	duplicates := a.hasDuplicates(key)
+
+	if duplicates.HasDuplicates {
+		for i := 0; i < len(duplicates.Indexs); i++ {
+
+		}
 	}
 }

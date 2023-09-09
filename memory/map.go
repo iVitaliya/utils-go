@@ -6,53 +6,35 @@ import (
 
 var logger = log.NewLogger()
 
-type mapInstance[T any] map[string]struct {
-	value T
-	index int
-}
+type mapInstance[T any] map[string]T
+
 type mapEntry[T any] struct {
 	Key   string
 	Value T
 }
 
+type mapEntries[T any] struct {
+	Next struct {
+		Done  bool
+		Value mapEntry[T]
+	}
+	Return []mapEntry[T]
+}
+
 func NewMap[T any]() mapInstance[T] {
-	instance := make(map[string]struct {
-		value T
-		index int
-	})
+	instance := make(map[string]T)
 
 	return instance
 }
 
-func (mi *mapInstance[T]) At(index int) T {
-	var (
-		ind     = index
-		lastInd = len(*mi)
-	)
-
-	if ind < 0 {
-		ind = 0
-	} else if ind > lastInd {
-		ind = lastInd
-	}
-
-	for _, v := range *mi {
-		if v.index == ind {
-			return v.value
-		}
-	}
-
-	return *new(T)
-}
-
 // Does the same as .DeleteAll() but then returns all the deleted key-value's.
-func (mi *mapInstance[T]) Clear() []*mapEntry[T] {
-	var arr []*mapEntry[T]
+func (mi *mapInstance[T]) Clear() []mapEntry[T] {
+	var arr []mapEntry[T]
 
 	for key, val := range *mi {
-		arr = append(arr, &mapEntry[T]{
+		arr = append(arr, mapEntry[T]{
 			Key:   key,
-			Value: val.value,
+			Value: val,
 		})
 
 		delete(*mi, key)
@@ -80,9 +62,31 @@ func (mi *mapInstance[T]) DeleteAll() {
 	}
 }
 
+func (mi *mapInstance[T]) Entries() arrayInstance[struct {
+	Key   string
+	Value T
+}] {
+	arr := NewArray[struct {
+		Key   string
+		Value T
+	}]()
+
+	for key, val := range *mi {
+		arr.Append(struct {
+			Key   string
+			Value T
+		}{
+			Key:   key,
+			Value: val,
+		})
+	}
+
+	return arr
+}
+
 func (mi *mapInstance[T]) Every(predicate func(element T, iterator mapInstance[T]) bool) bool {
-	for _, v := range *mi {
-		if predicate(v.value, *mi) {
+	for _, val := range *mi {
+		if predicate(val, *mi) {
 			return true
 		}
 	}
@@ -90,34 +94,38 @@ func (mi *mapInstance[T]) Every(predicate func(element T, iterator mapInstance[T
 	return false
 }
 
-func (mi *mapInstance[T]) Find(predicate func(element T, index int, iterator mapInstance[T]) T) T {
-	for _, v := range *mi {
-		return predicate(v.value, v.index, *mi)
+func (mi *mapInstance[T]) Find(predicate func(element T, iterator mapInstance[T]) T) T {
+	for _, val := range *mi {
+		return predicate(val, *mi)
 	}
 
 	return *new(T)
 }
 
 func (mi *mapInstance[T]) ForEach(predicate func(element T, iterator mapInstance[T])) {
-	for _, v := range *mi {
-		predicate(v.value, *mi)
+	for _, val := range *mi {
+		predicate(val, *mi)
 	}
 }
 
-func (mi *mapInstance[T]) Get(key string) T {
+func (mi *mapInstance[T]) Get(key string) mapEntry[T] {
 	for k, val := range *mi {
 		if k == key {
-			return val.value
+			return mapEntry[T]{
+				Key:   key,
+				Value: val,
+			}
 		}
 	}
 
 	logger.Error("Couldn't find the key \"" + key + "\" in the Map, are you sure you provided the right key and didn't make a typo?")
-	return *new(T)
+
+	return *new(mapEntry[T])
 }
 
 func (mi *mapInstance[T]) Has(key string) bool {
 	for k, _ := range *mi {
-		if key == k {
+		if k == key {
 			return true
 		}
 	}
@@ -125,15 +133,18 @@ func (mi *mapInstance[T]) Has(key string) bool {
 	return false
 }
 
-func (mi *mapInstance[T]) Set(key string, value T) {
-	m := *mi
+func (mi *mapInstance[T]) Keys() arrayInstance[string] {
+	arr := NewArray[string]()
 
-	m[key] = struct {
-		value T
-		index int
-	}{
-		value: value,
+	for key, _ := range *mi {
+		arr.Append(key)
 	}
+
+	return arr
+}
+
+func (mi *mapInstance[T]) Set(key string, value T) {
+	(*mi)[key] = value
 }
 
 func (mi *mapInstance[T]) Size() int {
@@ -146,6 +157,22 @@ func (mi *mapInstance[T]) ToArray() arrayInstance[T] {
 	mi.ForEach(func(element T, iterator mapInstance[T]) {
 		arr.Append(element)
 	})
+
+	return arr
+}
+
+func (mi *mapInstance[T]) Values() arrayInstance[T] {
+	arr := NewArray[T]()
+
+	if mi.Size() < 1 {
+		logger.Error("Couldn't retrieve any values as the Map is currently empty, so fetching values would be impossible")
+
+		return arr
+	}
+
+	for _, val := range *mi {
+		arr.Append(val)
+	}
 
 	return arr
 }
