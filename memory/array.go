@@ -20,7 +20,7 @@ func NewArray[T any]() arrayInstance[T] {
 func (a *arrayInstance[T]) At(index int) arrayEntry[T] {
 	if index < 0 {
 		return a.First()
-	} else if index > a.Length() {
+	} else if index >= a.Length() {
 		return a.Last()
 	} else {
 		return arrayEntry[T]{
@@ -31,7 +31,30 @@ func (a *arrayInstance[T]) At(index int) arrayEntry[T] {
 }
 
 func (a *arrayInstance[T]) Append(entry T) arrayInstance[T] {
-	a.removeDuplicates(entry)
+
+}
+
+// Clear all the items from the Array
+func (a *arrayInstance[T]) Clear() {
+	*a = arrayInstance[T]{}
+}
+
+// Returns a boolean defining whether a deletion of specified item has succeeded or not
+func (a *arrayInstance[T]) Delete(index int) {
+	arr := NewArray[T]()
+
+	if index < 0 || index >= a.Length() {
+		return
+	}
+
+	// Copy the elements before the index
+	copy(arr, (*a)[:index])
+
+	// Copy the elements after the index
+	copy(arr[index:], (*a)[index+1:])
+
+	// Re-assign the array with the new array
+	*a = arr
 }
 
 // Retrieves the First item defined in the array.
@@ -59,14 +82,14 @@ func (a *arrayInstance[T]) hasDuplicates(key T) arrayDuplicates {
 		}
 	}
 
-	if indexs.Length() < 1 {
+	if count > 0 {
 		hasDups = true
 	}
 
 	return arrayDuplicates{
 		Count:         count,
 		HasDuplicates: hasDups,
-		Indexs:        indexs.([]int),
+		Indexs:        indexs,
 	}
 }
 
@@ -95,14 +118,4 @@ func (a *arrayInstance[T]) Push(entries ...T) arrayInstance[T] {
 	}
 
 	return *a
-}
-
-func (a *arrayInstance[T]) removeDuplicates(key T) {
-	duplicates := a.hasDuplicates(key)
-
-	if duplicates.HasDuplicates {
-		for i := 0; i < len(duplicates.Indexs); i++ {
-
-		}
-	}
 }
